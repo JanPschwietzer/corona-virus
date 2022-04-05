@@ -5,6 +5,8 @@ date: '2022-04-05'
 output:
   word_document: default
   pdf_document: default
+sansfont: Verdana
+fontsize: 24
 ---
 
 ```{r setup, include=FALSE}
@@ -85,9 +87,9 @@ Um nun aber auch ein Bild der Omikron-Variante zu bekommen, bestimmen wir die To
 
 ```{r}
 
-corona_omikron %>% ggplot(aes(date)) + geom_line(aes(y=new_confirmed), color="black") + geom_line(aes(y=new_deceased), color="red") + xlab("Monate (2021)") + ylab("Fälle") + ggtitle("Omikron Fall/Todeszahlen Absolut") + theme(plot.title = element_text(hjust = 0.5))
+corona_omikron %>% ggplot(aes(date)) + geom_line(aes(y=new_confirmed), color="black") + geom_line(aes(y=new_deceased), color="red") + xlab("Monate (2022)") + ylab("Fälle") + ggtitle("Omikron Fall/Todeszahlen Absolut") + theme(plot.title = element_text(hjust = 0.5))
 
-corona_omikron %>% ggplot(aes(x=date, y=rate)) + geom_line() + ggtitle("Todesrate der Omikron Variante") + xlab("Monate (2021)") + ylab("Todesrate in Prozent") + theme(plot.title = element_text(hjust = 0.5))
+corona_omikron %>% ggplot(aes(x=date, y=rate)) + geom_line() + ggtitle("Todesrate der Omikron Variante") + xlab("Monate (2022)") + ylab("Todesrate in Prozent") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
 Die Sterberate der Omikron-Variante im Durchschnitt beträgt somit (in Prozent):
