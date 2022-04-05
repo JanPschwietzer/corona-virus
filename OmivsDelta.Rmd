@@ -1,0 +1,107 @@
+---
+title: "Corona Deutschland"
+author: "Jan Schwietzer"
+date: '2022-04-05'
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lubridate)
+
+corona_df <- read_csv("DE.csv")
+glimpse(corona_df)
+
+```
+
+## Corona Deutschland
+### Jan Schwietzer
+### Stand: 5.4.2022
+
+Ich versuche mit diesem Datensatz zu bestimmen wie sich die Sterberate durch das Coronavirus seit Omikron verändert hat.
+Die Datenbank ist von [link] (https://corona-open-data.ckan.de/dataset/covid-19-open-data-github/resource/d3b3703b-0c2f-4aa9-8b9c-92eed8ffec5d)
+Dies ist keine Wissenschaftliche Arbeit und nur ein Hobbyprojekt. Alle Angaben sind ohne Gewähr!
+
+Vorbereitung der Daten:
+
+```{r}
+
+corona_df_filter <- corona_df %>% select("date", "cumulative_confirmed", "new_confirmed", "cumulative_deceased", "new_deceased")
+```
+## Seit wann ist die Omikron Variante verbreitet?
+
+Die Omikron-Variante wurde in Niedersachsen das erste Mal am 3.12.2021 nachgewiesen. [link](https://www.ndr.de/nachrichten/info/Coronavirus-Variante-Omikron-Was-ueber-BA1-und-BA2-bekannt-ist,omikron102.html#:~:text=Wie%20verbreitet%20ist%20Omikron%20in,2021%20den%20ersten%20Omikron%2DNachweis.)
+
+Die Delta-Variante, welche seit Ende April 2021 dominant war, wurde von der Omikron-Variante abgelöst. Ab Januar 2022 war somit Omikron die führende Coronavirus Variante [link] (https://www.rki.de/DE/Content/InfAZ/N/Neuartiges_Coronavirus/Virusvariante.html#:~:text=Anschlie%C3%9Fend%20hat%20sich%20Alpha%20rasch,die%20dominierende%20Variante%20in%20Deutschland.)
+
+Somit sind die Daten ab Januar 2022 und die Daten von Ende April bis Januar 2022 am interessantesten um einen Vergleich zwischen den beiden Varianten zu finden.
+
+```{r}
+
+omikron <- interval(start = "2022-01-01", end = "2022-04-02")
+delta <- interval(start = "2021-04-30", end = "2021-12-31")
+
+corona_omikron <- corona_df_filter %>% filter(date %within% omikron) %>% mutate(
+  rate = (new_deceased / new_confirmed) * 10)
+
+corona_delta <- corona_df_filter %>% filter (date %within% delta) %>% mutate(
+  rate = (new_deceased / new_confirmed) * 10)
+
+```
+
+## Delta
+
+Um nun ein genaues Bild der Delta-Variante zu bekommen bestimmen wir die Todesrate der Coronainfizierten als die Delta-Variante die dominante Variante war.
+
+```{r}
+
+corona_delta %>% ggplot(aes(date)) + geom_line(aes(y=new_confirmed), color="black") + geom_line(aes(y=new_deceased), color="red") + xlab("Monate (2021)") + ylab("Fälle") + ggtitle("Delta Variante Fall/Todeszahlen Absolut") + theme(plot.title = element_text(hjust = 0.5))
+
+corona_delta %>% ggplot(aes(x=date, y=rate)) + geom_line() + ggtitle("Todesrate der Deltavariante") + xlab("Monate (2021)") + ylab("Todesrate in Prozent") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+Die Sterberate der Delta-Variante im Durchschnitt beträgt somit (in Prozent):
+
+```{r}
+mean(corona_delta$rate) * 10
+
+```
+
+Die Sterberate der Delta-Variante im Mittel (50. Percentil) beträgt (in Prozent):
+```{r}
+median(corona_delta$rate) * 10
+```
+
+Interessant ist: Der Durchschnitt der mit 1.72% Todesrate deutlich den Mittelwert von 0.74% übersteigt, dies könnte auf Überlastung des Gesundheitssystemes in gewissen Phasen schließen, dieser Frage bin ich aber mit den Daten nicht weiter nachgegangen.
+
+
+## Omikron
+
+Um nun aber auch ein Bild der Omikron-Variante zu bekommen, bestimmen wir die Todesrate der Coronainfizierten als die Omikron-Variante die dominante Variante war (Januar 2022-April 2022).
+
+```{r}
+
+corona_omikron %>% ggplot(aes(date)) + geom_line(aes(y=new_confirmed), color="black") + geom_line(aes(y=new_deceased), color="red") + xlab("Monate (2021)") + ylab("Fälle") + ggtitle("Omikron Fall/Todeszahlen Absolut") + theme(plot.title = element_text(hjust = 0.5))
+
+corona_omikron %>% ggplot(aes(x=date, y=rate)) + geom_line() + ggtitle("Todesrate der Omikron Variante") + xlab("Monate (2021)") + ylab("Todesrate in Prozent") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+Die Sterberate der Omikron-Variante im Durchschnitt beträgt somit (in Prozent):
+
+```{r}
+mean(corona_omikron$rate) * 10
+
+```
+
+Die Sterberate der Omikron-Variante im Mittel (50. Percentil) beträgt (in Prozent):
+```{r}
+median(corona_omikron$rate) * 10
+```
+
+### Fazit
+
+Meine Erkenntnis legt somit nahe, dass seit dominant werden der Omikron-Variante das Coronavirus deutlich abgeschwächt wurde. (Im Mittel: 0,74% Todesrate/Delta vs. 0.11% Todesrate/Omikron). Diese Erkenntnis lässt allerdings wichtige Nebenfaktoren wie die Krankenhausbelegung etc. außen vor und ist somit nicht repräsentativ.
